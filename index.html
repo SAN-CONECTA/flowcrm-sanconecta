@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,6 +28,44 @@
   --radius-sm: 8px;
   --shadow:    0 4px 24px rgba(0,0,0,0.4);
 }
+
+/* ═══════════════════════════════════════════════════════
+   TEMAS
+═══════════════════════════════════════════════════════ */
+[data-theme="dark"] {
+  --bg:#0a0a0f;--surface:#111118;--surface2:#1a1a24;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0f0f8;--muted:#7070a0;
+}
+[data-theme="light"] {
+  --bg:#f4f4f8;--surface:#ffffff;--surface2:#f0f0f5;
+  --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+  --text:#1a1a2e;--muted:#6b7280;
+  --accent:#6c63ff;--accent2:#7c3aed;
+}
+[data-theme="corporate"] {
+  --bg:#0d1b2a;--surface:#112236;--surface2:#172d44;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
+  --text:#e8f4fd;--muted:#6b9ab8;
+  --accent:#0ea5e9;--accent2:#38bdf8;
+}
+[data-theme="forest"] {
+  --bg:#0a1a0e;--surface:#112216;--surface2:#183020;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
+  --text:#e8f5e9;--muted:#6b9e74;
+  --accent:#22c55e;--accent2:#4ade80;
+}
+
+/* Seletor de tema */
+.theme-picker{display:flex;gap:8px;align-items:center;padding:10px 12px}
+.theme-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.2s;flex-shrink:0}
+.theme-dot:hover{transform:scale(1.15)}
+.theme-dot.active{border-color:var(--text);transform:scale(1.1)}
+.theme-dot-dark{background:linear-gradient(135deg,#111118,#6c63ff)}
+.theme-dot-light{background:linear-gradient(135deg,#f4f4f8,#6c63ff)}
+.theme-dot-corporate{background:linear-gradient(135deg,#0d1b2a,#0ea5e9)}
+.theme-dot-forest{background:linear-gradient(135deg,#0a1a0e,#22c55e)}
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;display:flex;flex-direction:column}
@@ -432,6 +470,14 @@ tr:hover td{background:var(--surface2)}
       <div class="user-menu" id="user-menu">
         <div class="user-menu-item" onclick="abrirTrocarSenha()">🔑 Trocar Senha</div>
         <div class="user-menu-item" id="menu-changelog" onclick="abrirChangelog()">📋 v3.0.0 — Changelog</div>
+        <div class="user-menu-divider"></div>
+        <div style="padding:6px 8px 2px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">🎨 Tema</div>
+        <div class="theme-picker">
+          <div class="theme-dot theme-dot-dark active" id="dot-dark" onclick="setTema('dark')" title="Escuro"></div>
+          <div class="theme-dot theme-dot-light" id="dot-light" onclick="setTema('light')" title="Claro"></div>
+          <div class="theme-dot theme-dot-corporate" id="dot-corporate" onclick="setTema('corporate')" title="Corporativo"></div>
+          <div class="theme-dot theme-dot-forest" id="dot-forest" onclick="setTema('forest')" title="Floresta"></div>
+        </div>
         <div class="user-menu-divider"></div>
         <div class="user-menu-item danger" onclick="fazerLogout()">🚪 Sair</div>
       </div>
@@ -1729,6 +1775,21 @@ window.salvarSenha = salvarSenha;
 /* ══════════════════════════════════════════
    CHANGELOG
 ══════════════════════════════════════════ */
+function setTema(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('san_tema', t);
+  ['dark','light','corporate','forest'].forEach(x => {
+    document.getElementById('dot-' + x)?.classList.toggle('active', x === t);
+  });
+}
+window.setTema = setTema;
+
+function carregarTema() {
+  const t = localStorage.getItem('san_tema') || 'dark';
+  setTema(t);
+}
+carregarTema();
+
 function abrirChangelog() { abrirModal('modal-changelog'); }
 window.abrirChangelog = abrirChangelog;
 
