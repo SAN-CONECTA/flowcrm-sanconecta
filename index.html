@@ -919,10 +919,9 @@
     </div>
 
     <div style="text-align:center;margin-top:18px;font-size:10px;color:var(--muted);border-top:1px solid var(--border);padding-top:14px">
-      SAN TECNOLOGIA — v2.6.0
+      SAN TECNOLOGIA — v2.7.0
     </div>
-  <div id="diag-box" style="display:none;margin-top:12px;background:#1a1a2e;border:1px solid #f87171;border-radius:10px;padding:14px;font-size:11px;color:#f87171;text-align:left;word-break:break-all;max-height:160px;overflow-y:auto"></div>
-  <button id="btn-diag" style="margin-top:10px;width:100%;padding:8px;border-radius:8px;border:1px solid #444;background:transparent;color:#666;font-size:11px;cursor:pointer">🔍 Diagnóstico</button>
+  
   </div>
 </div>
 
@@ -2530,49 +2529,7 @@ async function doCadastro() {
   }
 
 
-  // ── DIAGNÓSTICO DE LOGIN ────────────────────────────────────────
-  window.rodarDiagnostico = async function() {
-    const box = document.getElementById('diag-box');
-    box.style.display = 'block';
-    box.innerHTML = '⏳ Testando conexão com Firebase...';
-    const logs = [];
-
-    // 1. Verificar se Firebase Auth está inicializado
-    try {
-      logs.push('✅ Firebase App: OK');
-      logs.push('✅ Auth inicializado: ' + (auth ? 'SIM' : 'NÃO'));
-    } catch(e) { logs.push('❌ Firebase App: ' + e.message); }
-
-    // 2. Testar conexão com Firestore
-    try {
-      const snap = await getDocs(collection(db, 'usuarios'));
-      logs.push('✅ Firestore: conectado (' + snap.size + ' usuários)');
-    } catch(e) { logs.push('❌ Firestore: ' + e.code + ' — ' + e.message); }
-
-    // 3. Verificar usuário atual
-    try {
-      const u = auth.currentUser;
-      logs.push('👤 Usuário atual: ' + (u ? u.email : 'nenhum (não logado)'));
-    } catch(e) { logs.push('❌ Auth currentUser: ' + e.message); }
-
-    // 4. Testar login com as credenciais do campo
-    const email = document.getElementById('login-email').value.trim();
-    const senha = document.getElementById('login-senha').value;
-    if (email && senha) {
-      try {
-        await signInWithEmailAndPassword(auth, email, senha);
-        logs.push('✅ Login: SUCESSO');
-      } catch(e) {
-        logs.push('❌ Login falhou: ' + e.code);
-        logs.push('   Detalhe: ' + e.message);
-      }
-    } else {
-      logs.push('ℹ️ Preencha e-mail e senha para testar o login');
-    }
-
-    box.innerHTML = logs.join('<br>');
-  };
-
+  
 function abrirChangelog() {
   document.getElementById('modal-changelog').style.display = 'flex';
   document.getElementById('modal-changelog').classList.add('open');
@@ -3063,47 +3020,7 @@ function setStatus(online) {
 </footer>
 
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  var btn = document.getElementById('btn-diag');
-  if (!btn) return;
-  btn.addEventListener('click', async function() {
-    var box = document.getElementById('diag-box');
-    box.style.display = 'block';
-    box.innerHTML = '⏳ Testando...';
-    var logs = [];
 
-    var email = document.getElementById('login-email').value.trim();
-    var senha = document.getElementById('login-senha').value;
-
-    logs.push('📧 E-mail: ' + (email || '(vazio)'));
-    logs.push('🔑 Senha: ' + (senha ? '●'.repeat(senha.length) : '(vazia)'));
-    logs.push('🌐 URL: ' + window.location.href);
-
-    // Testar fetch ao Firebase
-    try {
-      var r = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDlK8OSZrCNungMFlhQssqif8uZSGSlFZQ', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({email: email, password: senha, returnSecureToken: true})
-      });
-      var d = await r.json();
-      if (d.idToken) {
-        logs.push('✅ LOGIN DIRETO: SUCESSO!');
-        logs.push('👤 ' + d.email);
-        logs.push('ℹ️ ✅ VERSÃO 32 — arquivo atualizado corretamente!');
-      } else {
-        logs.push('❌ LOGIN: FALHOU');
-        logs.push('Código: ' + (d.error && d.error.message ? d.error.message : JSON.stringify(d.error)));
-      }
-    } catch(e) {
-      logs.push('❌ ERRO DE REDE: ' + e.message);
-    }
-
-    box.innerHTML = logs.join('<br>');
-  });
-});
-</script>
 
 </body>
 </html>
