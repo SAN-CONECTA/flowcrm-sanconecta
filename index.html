@@ -118,6 +118,7 @@ a{text-decoration:none;color:inherit}
 .tag-trust{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
 .tag-infra{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3)}
 .tag-outros{background:rgba(167,139,250,.15);color:var(--accent2);border:1px solid rgba(167,139,250,.3)}
+.tag-nexxo{background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3)}
 
 /* ═══════════════════════════════════════════════════════
    FORMULÁRIOS
@@ -263,6 +264,7 @@ main{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:
 .deal-card[data-tipo="trust"]{border-left-color:var(--green)}
 .deal-card[data-tipo="infra"]{border-left-color:var(--orange)}
 .deal-card[data-tipo="outros"]{border-left-color:var(--accent2)}
+.deal-card[data-tipo="nexxo"]{border-left-color:#06b6d4}
 .deal-name{font-size:13px;font-weight:600;margin-bottom:2px}
 .deal-company{font-size:11px;color:var(--muted);margin-bottom:8px}
 .deal-tags{display:flex;flex-wrap:wrap;gap:4px}
@@ -693,6 +695,7 @@ tr:hover td{background:var(--surface2)}
           <option value="trust">🟢 B — TRUST</option>
           <option value="infra">🟠 C — Infraestrutura</option>
           <option value="outros">🟣 D — Outros</option>
+          <option value="nexxo">🔵 E — Nexxo-AI</option>
         </select>
       </div>
     </div>
@@ -759,6 +762,7 @@ tr:hover td{background:var(--surface2)}
       <div class="perm-row"><div class="perm-label"><div class="perm-dot" style="background:var(--green)"></div>B — TRUST</div><label class="toggle"><input type="checkbox" id="nu-t-trust" checked><div class="toggle-slider"></div></label></div>
       <div class="perm-row"><div class="perm-label"><div class="perm-dot" style="background:var(--orange)"></div>C — Infraestrutura</div><label class="toggle"><input type="checkbox" id="nu-t-infra" checked><div class="toggle-slider"></div></label></div>
       <div class="perm-row"><div class="perm-label"><div class="perm-dot" style="background:var(--accent2)"></div>D — Outros</div><label class="toggle"><input type="checkbox" id="nu-t-outros" checked><div class="toggle-slider"></div></label></div>
+      <div class="perm-row"><div class="perm-label"><div class="perm-dot" style="background:#06b6d4"></div>E — Nexxo-AI</div><label class="toggle"><input type="checkbox" id="nu-t-nexxo" checked><div class="toggle-slider"></div></label></div>
     </div>
     <div class="login-error" id="nu-error"></div>
     <div class="modal-actions">
@@ -777,6 +781,7 @@ tr:hover td{background:var(--surface2)}
     <div class="perm-row"><div class="perm-label"><div class="perm-dot" style="background:var(--green)"></div>B — TRUST</div><label class="toggle"><input type="checkbox" id="p-trust"><div class="toggle-slider"></div></label></div>
     <div class="perm-row"><div class="perm-label"><div class="perm-dot" style="background:var(--orange)"></div>C — Infraestrutura</div><label class="toggle"><input type="checkbox" id="p-infra"><div class="toggle-slider"></div></label></div>
     <div class="perm-row"><div class="perm-label"><div class="perm-dot" style="background:var(--accent2)"></div>D — Outros</div><label class="toggle"><input type="checkbox" id="p-outros"><div class="toggle-slider"></div></label></div>
+    <div class="perm-row"><div class="perm-label"><div class="perm-dot" style="background:#06b6d4"></div>E — Nexxo-AI</div><label class="toggle"><input type="checkbox" id="p-nexxo"><div class="toggle-slider"></div></label></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="fecharModal('modal-perms')">Cancelar</button>
       <button class="btn btn-primary" onclick="salvarPermissoes()">💾 Salvar</button>
@@ -863,8 +868,8 @@ const ETAPAS = {
   retorno:   { label: 'Retorno Pendente',  color: '#f97316' },
   fechamento:{ label: 'Fechamento',        color: '#22c55e' }
 };
-const TIPO_LABEL = { consultoria:'A — Consultoria', trust:'B — TRUST', infra:'C — Infraestrutura', outros:'D — Outros' };
-const TIPO_TAG   = { consultoria:'tag-consultoria', trust:'tag-trust', infra:'tag-infra', outros:'tag-outros' };
+const TIPO_LABEL = { consultoria:'A — Consultoria', trust:'B — TRUST', infra:'C — Infraestrutura', outros:'D — Outros', nexxo:'E — Nexxo-AI' };
+const TIPO_TAG   = { consultoria:'tag-consultoria', trust:'tag-trust', infra:'tag-infra', outros:'tag-outros', nexxo:'tag-nexxo' };
 const PRIO_TAG   = { normal:'tag-blue', alta:'tag-orange', urgente:'tag-red' };
 
 /* ── ESTADO ── */
@@ -1597,7 +1602,7 @@ function renderUsuarios() {
     const isAdm = u.email === ADMIN_EMAIL || u.role === 'admin';
     const tipos = u.tiposPermitidos || { consultoria:true, trust:true, infra:true, outros:true };
     const dots = [
-      ['consultoria', '#eab308'], ['trust','#22c55e'], ['infra','#f97316'], ['outros','#a78bfa']
+      ['consultoria', '#eab308'], ['trust','#22c55e'], ['infra','#f97316'], ['outros','#a78bfa'], ['nexxo','#06b6d4']
     ].map(([k,c]) => `<span title="${TIPO_LABEL[k]}" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${tipos[k]?c:'#333'};margin:0 2px;opacity:${tipos[k]?1:.3}"></span>`).join('');
 
     const row = document.createElement('div');
@@ -1672,7 +1677,8 @@ async function salvarNovoUsuario() {
         consultoria: document.getElementById('nu-t-consultoria').checked,
         trust:       document.getElementById('nu-t-trust').checked,
         infra:       document.getElementById('nu-t-infra').checked,
-        outros:      document.getElementById('nu-t-outros').checked
+        outros:      document.getElementById('nu-t-outros').checked,
+        nexxo:       document.getElementById('nu-t-nexxo').checked
       },
       criadoEm: new Date().toISOString(), criadoPorAdmin: true
     });
@@ -1701,6 +1707,7 @@ function abrirPermissoes(id) {
   document.getElementById('p-trust').checked       = tipos.trust       !== false;
   document.getElementById('p-infra').checked       = tipos.infra       !== false;
   document.getElementById('p-outros').checked      = tipos.outros      !== false;
+  document.getElementById('p-nexxo').checked       = tipos.nexxo       !== false;
   abrirModal('modal-perms');
 }
 window.abrirPermissoes = abrirPermissoes;
@@ -1711,7 +1718,8 @@ async function salvarPermissoes() {
     consultoria: document.getElementById('p-consultoria').checked,
     trust:       document.getElementById('p-trust').checked,
     infra:       document.getElementById('p-infra').checked,
-    outros:      document.getElementById('p-outros').checked
+    outros:      document.getElementById('p-outros').checked,
+    nexxo:       document.getElementById('p-nexxo').checked
   };
   await updateDoc(doc(db, 'usuarios', permUserId), { tiposPermitidos: tipos });
   fecharModal('modal-perms');
