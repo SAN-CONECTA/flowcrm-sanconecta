@@ -119,6 +119,7 @@ a{text-decoration:none;color:inherit}
 .tag-infra{background:rgba(249,115,22,.15);color:var(--orange);border:1px solid rgba(249,115,22,.3)}
 .tag-outros{background:rgba(167,139,250,.15);color:var(--accent2);border:1px solid rgba(167,139,250,.3)}
 .tag-nexxo{background:rgba(6,182,212,.15);color:#06b6d4;border:1px solid rgba(6,182,212,.3)}
+.tag-custom{background:rgba(128,128,128,.15);color:#aaa;border:1px solid rgba(128,128,128,.3)}
 
 /* ═══════════════════════════════════════════════════════
    FORMULÁRIOS
@@ -858,10 +859,36 @@ tr:hover td{background:var(--surface2)}
     <div class="modal-title" id="gerenciar-titulo">Gerenciar</div>
 
     <!-- Adicionar novo item -->
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-      <input class="input" id="gerenciar-input" placeholder="Novo item..." style="flex:1"
-        onkeydown="if(event.key==='Enter')adicionarItemLista()">
-      <button class="btn btn-primary" onclick="adicionarItemLista()">＋ Adicionar</button>
+    <div id="gerenciar-add-tipo" style="display:none;flex-direction:column;gap:10px;margin-bottom:16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px">
+      <div style="font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px">Novo Tipo de Trabalho</div>
+      <div style="display:flex;gap:8px">
+        <input class="input" id="gerenciar-input" placeholder="Nome do tipo..." style="flex:1"
+          onkeydown="if(event.key==='Enter')adicionarItemLista()">
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600">Cor do badge:</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap" id="cor-picker">
+          <div class="cor-opt active" data-cor="#eab308" data-bg="rgba(234,179,8,.15)" data-border="rgba(234,179,8,.3)" onclick="selecionarCor(this)" style="width:28px;height:28px;border-radius:50%;background:#eab308;cursor:pointer;border:3px solid #fff;transition:.2s" title="Amarelo"></div>
+          <div class="cor-opt" data-cor="#22c55e" data-bg="rgba(34,197,94,.15)" data-border="rgba(34,197,94,.3)" onclick="selecionarCor(this)" style="width:28px;height:28px;border-radius:50%;background:#22c55e;cursor:pointer;border:3px solid transparent;transition:.2s" title="Verde"></div>
+          <div class="cor-opt" data-cor="#f97316" data-bg="rgba(249,115,22,.15)" data-border="rgba(249,115,22,.3)" onclick="selecionarCor(this)" style="width:28px;height:28px;border-radius:50%;background:#f97316;cursor:pointer;border:3px solid transparent;transition:.2s" title="Laranja"></div>
+          <div class="cor-opt" data-cor="#a78bfa" data-bg="rgba(167,139,250,.15)" data-border="rgba(167,139,250,.3)" onclick="selecionarCor(this)" style="width:28px;height:28px;border-radius:50%;background:#a78bfa;cursor:pointer;border:3px solid transparent;transition:.2s" title="Roxo"></div>
+          <div class="cor-opt" data-cor="#06b6d4" data-bg="rgba(6,182,212,.15)" data-border="rgba(6,182,212,.3)" onclick="selecionarCor(this)" style="width:28px;height:28px;border-radius:50%;background:#06b6d4;cursor:pointer;border:3px solid transparent;transition:.2s" title="Ciano"></div>
+          <div class="cor-opt" data-cor="#ef4444" data-bg="rgba(239,68,68,.15)" data-border="rgba(239,68,68,.3)" onclick="selecionarCor(this)" style="width:28px;height:28px;border-radius:50%;background:#ef4444;cursor:pointer;border:3px solid transparent;transition:.2s" title="Vermelho"></div>
+          <div class="cor-opt" data-cor="#3b82f6" data-bg="rgba(59,130,246,.15)" data-border="rgba(59,130,246,.3)" onclick="selecionarCor(this)" style="width:28px;height:28px;border-radius:50%;background:#3b82f6;cursor:pointer;border:3px solid transparent;transition:.2s" title="Azul"></div>
+          <div class="cor-opt" data-cor="#ec4899" data-bg="rgba(236,72,153,.15)" data-border="rgba(236,72,153,.3)" onclick="selecionarCor(this)" style="width:28px;height:28px;border-radius:50%;background:#ec4899;cursor:pointer;border:3px solid transparent;transition:.2s" title="Rosa"></div>
+          <div class="cor-opt" data-cor="#f0f0f0" data-bg="rgba(240,240,240,.1)" data-border="rgba(240,240,240,.25)" onclick="selecionarCor(this)" style="width:28px;height:28px;border-radius:50%;background:#888;cursor:pointer;border:3px solid transparent;transition:.2s" title="Cinza"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary w-full" onclick="adicionarItemLista()">＋ Adicionar Tipo</button>
+    </div>
+
+    <!-- Adicionar responsável (simples) -->
+    <div id="gerenciar-add-resp" style="display:none;flex-direction:column;gap:8px;margin-bottom:16px">
+      <div style="display:flex;gap:8px">
+        <input class="input" id="gerenciar-input-resp" placeholder="Nome do responsável..."
+          style="flex:1" onkeydown="if(event.key==='Enter')adicionarItemLista()">
+        <button class="btn btn-primary" onclick="adicionarItemLista()">＋ Adicionar</button>
+      </div>
     </div>
 
     <!-- Lista de itens -->
@@ -1875,24 +1902,56 @@ function preencherSelectTipo() {
   // Atualizar constantes em memória
   lista.forEach(t => {
     TIPO_LABEL[t.valor] = t.label;
-    TIPO_TAG[t.valor]   = 'tag-' + t.valor;
+    if (t.cor) {
+      // Injetar CSS dinâmico para tipos customizados
+      const styleId = 'tag-dyn-' + t.valor;
+      if (!document.getElementById(styleId)) {
+        const s = document.createElement('style');
+        s.id = styleId;
+        s.textContent = '.tag-' + t.valor + '{background:' + (t.bg||'rgba(128,128,128,.15)') + ';color:' + t.cor + ';border:1px solid ' + (t.brd||'rgba(128,128,128,.3)') + '}' +
+          '.deal-card[data-tipo="' + t.valor + '"]{border-left-color:' + t.cor + '}';
+        document.head.appendChild(s);
+      }
+      TIPO_TAG[t.valor] = 'tag-' + t.valor;
+    } else {
+      TIPO_TAG[t.valor] = 'tag-' + t.valor;
+    }
   });
 }
 
 let _gerenciarChave = null;
+let _corSelecionada  = { cor:'#eab308', bg:'rgba(234,179,8,.15)', border:'rgba(234,179,8,.3)' };
+
+function selecionarCor(el) {
+  document.querySelectorAll('.cor-opt').forEach(d => d.style.borderColor = 'transparent');
+  el.style.borderColor = '#fff';
+  _corSelecionada = { cor: el.dataset.cor, bg: el.dataset.bg, border: el.dataset.border };
+}
+window.selecionarCor = selecionarCor;
 
 function abrirGerenciar(chave) {
   _gerenciarChave = chave;
   document.getElementById('gerenciar-titulo').textContent =
     chave === 'responsaveis' ? '👤 Gerenciar Responsáveis' : '🏷️ Gerenciar Tipos de Trabalho';
-  document.getElementById('gerenciar-input').value = '';
+
+  // Mostrar formulário correto
+  document.getElementById('gerenciar-add-tipo').style.display = chave === 'tipos' ? 'flex' : 'none';
+  document.getElementById('gerenciar-add-resp').style.display = chave === 'responsaveis' ? 'flex' : 'none';
+
+  if (chave === 'tipos') {
+    document.getElementById('gerenciar-input').value = '';
+    // Resetar seleção de cor
+    selecionarCor(document.querySelector('.cor-opt'));
+  } else {
+    document.getElementById('gerenciar-input-resp').value = '';
+  }
   renderGerenciarLista();
   abrirModal('modal-gerenciar');
 }
 window.abrirGerenciar = abrirGerenciar;
 
 function renderGerenciarLista() {
-  const lista  = getLista(_gerenciarChave);
+  const lista     = getLista(_gerenciarChave);
   const container = document.getElementById('gerenciar-lista');
   container.innerHTML = '';
 
@@ -1902,39 +1961,55 @@ function renderGerenciarLista() {
   }
 
   lista.forEach((item, idx) => {
-    const nome = _gerenciarChave === 'responsaveis' ? item : (item.emoji + ' ' + item.label);
-    const div  = document.createElement('div');
-    div.style.cssText = 'display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px';
-    div.innerHTML =
-      '<span style="flex:1;font-size:13px;font-weight:500">' + nome + '</span>' +
-      '<button onclick="removerItemLista(' + idx + ')" style="background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">🗑️ Remover</button>';
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px';
+
+    if (_gerenciarChave === 'responsaveis') {
+      div.innerHTML =
+        '<span style="flex:1;font-size:13px;font-weight:500">👤 ' + item + '</span>' +
+        '<button onclick="removerItemLista(' + idx + ')" style="background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">🗑️</button>';
+    } else {
+      const cor = item.cor || '#aaa';
+      const bg  = item.bg  || 'rgba(128,128,128,.15)';
+      const brd = item.brd || 'rgba(128,128,128,.3)';
+      const badge = '<span style="background:' + bg + ';color:' + cor + ';border:1px solid ' + brd + ';border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">' + item.label + '</span>';
+      div.innerHTML =
+        '<div style="width:12px;height:12px;border-radius:50%;background:' + cor + ';flex-shrink:0"></div>' +
+        '<span style="flex:1;font-size:13px;font-weight:500">' + item.label + '</span>' +
+        badge +
+        '<button onclick="removerItemLista(' + idx + ')" style="background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">🗑️</button>';
+    }
     container.appendChild(div);
   });
 }
 
 function adicionarItemLista() {
-  const input = document.getElementById('gerenciar-input');
-  const val   = input.value.trim();
-  if (!val) { toast('⚠️ Digite um nome para adicionar.'); return; }
-
   const lista = getLista(_gerenciarChave);
 
   if (_gerenciarChave === 'responsaveis') {
+    const val = document.getElementById('gerenciar-input-resp').value.trim();
+    if (!val) { toast('⚠️ Digite o nome do responsável.'); return; }
     if (lista.includes(val)) { toast('⚠️ Responsável já existe.'); return; }
     lista.push(val);
+    document.getElementById('gerenciar-input-resp').value = '';
   } else {
-    // Gerar valor slug para tipos
-    const slug  = val.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/__+/g, '_');
+    const val  = document.getElementById('gerenciar-input').value.trim();
+    if (!val) { toast('⚠️ Digite o nome do tipo.'); return; }
+    const slug = val.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/__+/g, '_');
     if (lista.find(t => t.valor === slug || t.label === val)) { toast('⚠️ Tipo já existe.'); return; }
-    const emojis = ['⚪','🔴','🟤','🔶','🔷','🟦','🟩','🟨','🟧','🟥'];
-    const emoji  = emojis[lista.length % emojis.length];
-    lista.push({ valor: slug, emoji, label: val });
+    lista.push({
+      valor: slug,
+      emoji: '🔘',
+      label: val,
+      cor: _corSelecionada.cor,
+      bg:  _corSelecionada.bg,
+      brd: _corSelecionada.border
+    });
+    document.getElementById('gerenciar-input').value = '';
   }
 
   salvarLista(_gerenciarChave, lista);
-  input.value = '';
   renderGerenciarLista();
-  // Atualizar selects
   if (_gerenciarChave === 'responsaveis') preencherSelectResp();
   else preencherSelectTipo();
   toast('✅ Item adicionado!');
