@@ -688,8 +688,18 @@ tr:hover td{background:var(--surface2)}
           <option value="urgente">Urgente</option>
         </select>
       </div>
-      <div class="form-group"><label>Responsável</label><input class="input" id="f-resp" placeholder="Nome do vendedor"></div>
-      <div class="form-group span-2"><label>Tipo de Trabalho</label>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;justify-content:space-between">
+          Responsável
+          <span onclick="abrirGerenciar('responsaveis')" style="font-size:10px;color:var(--accent2);cursor:pointer;font-weight:600;text-transform:none;letter-spacing:0">⚙️ Gerenciar</span>
+        </label>
+        <select class="input" id="f-resp"><option value="">Selecione...</option></select>
+      </div>
+      <div class="form-group span-2">
+        <label style="display:flex;align-items:center;justify-content:space-between">
+          Tipo de Trabalho
+          <span onclick="abrirGerenciar('tipos')" style="font-size:10px;color:var(--accent2);cursor:pointer;font-weight:600;text-transform:none;letter-spacing:0">⚙️ Gerenciar</span>
+        </label>
         <select class="input" id="f-tipo">
           <option value="consultoria">🟡 A — Consultoria</option>
           <option value="trust">🟢 B — TRUST</option>
@@ -842,6 +852,27 @@ tr:hover td{background:var(--surface2)}
 <!-- ══════════════════════════════════════════
      JAVASCRIPT
 ══════════════════════════════════════════ -->
+<!-- Modal Gerenciar Listas -->
+<div class="modal-overlay" id="modal-gerenciar">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title" id="gerenciar-titulo">Gerenciar</div>
+
+    <!-- Adicionar novo item -->
+    <div style="display:flex;gap:8px;margin-bottom:16px">
+      <input class="input" id="gerenciar-input" placeholder="Novo item..." style="flex:1"
+        onkeydown="if(event.key==='Enter')adicionarItemLista()">
+      <button class="btn btn-primary" onclick="adicionarItemLista()">＋ Adicionar</button>
+    </div>
+
+    <!-- Lista de itens -->
+    <div id="gerenciar-lista" style="display:flex;flex-direction:column;gap:6px;max-height:360px;overflow-y:auto"></div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="fecharModal('modal-gerenciar')">Fechar</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from 'https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js';
@@ -1239,8 +1270,8 @@ function abrirModalLead(id) {
     document.getElementById('f-hora').value    = l.hora    || '';
     document.getElementById('f-obs').value     = l.obs     || '';
     document.getElementById('f-prio').value    = l.prio    || 'normal';
-    document.getElementById('f-resp').value    = l.resp    || '';
-    document.getElementById('f-tipo').value    = l.tipo    || 'consultoria';
+    preencherSelectResp(); document.getElementById('f-resp').value = l.resp || '';
+    preencherSelectTipo(); document.getElementById('f-tipo').value = l.tipo || 'consultoria';
     carregarAnexos(id);
   } else {
     ['f-nome','f-empresa','f-tel','f-email','f-valor','f-data','f-hora','f-obs','f-resp'].forEach(x => { document.getElementById(x).value = ''; });
@@ -1249,6 +1280,8 @@ function abrirModalLead(id) {
     document.getElementById('f-tipo').value  = 'consultoria';
     document.getElementById('anexos-list').innerHTML = '';
   }
+  preencherSelectResp();
+  preencherSelectTipo();
   abrirModal('modal-lead');
 }
 window.abrirModalLead = abrirModalLead;
@@ -1797,6 +1830,129 @@ function carregarTema() {
   setTema(t);
 }
 carregarTema();
+
+
+/* ══════════════════════════════════════════
+   LISTAS DINÂMICAS (RESPONSÁVEIS / TIPOS)
+══════════════════════════════════════════ */
+const LISTAS_DEFAULT = {
+  responsaveis: ['SANDRO'],
+  tipos: [
+    { valor:'consultoria', emoji:'🟡', label:'A — Consultoria' },
+    { valor:'trust',       emoji:'🟢', label:'B — TRUST' },
+    { valor:'infra',       emoji:'🟠', label:'C — Infraestrutura' },
+    { valor:'outros',      emoji:'🟣', label:'D — Outros' },
+    { valor:'nexxo',       emoji:'🔵', label:'E — Nexxo-AI' },
+  ]
+};
+
+function getLista(chave) {
+  try { return JSON.parse(localStorage.getItem('san_lista_' + chave)) || LISTAS_DEFAULT[chave]; }
+  catch(e) { return LISTAS_DEFAULT[chave]; }
+}
+
+function salvarLista(chave, lista) {
+  localStorage.setItem('san_lista_' + chave, JSON.stringify(lista));
+}
+
+// Preencher select de responsáveis
+function preencherSelectResp() {
+  const sel = document.getElementById('f-resp');
+  const atual = sel.value;
+  const lista = getLista('responsaveis');
+  sel.innerHTML = '<option value="">Selecione...</option>' +
+    lista.map(r => '<option value="' + r + '">' + r + '</option>').join('');
+  if (atual) sel.value = atual;
+}
+
+// Preencher select de tipos
+function preencherSelectTipo() {
+  const sel = document.getElementById('f-tipo');
+  const atual = sel.value;
+  const lista = getLista('tipos');
+  sel.innerHTML = lista.map(t => '<option value="' + t.valor + '">' + t.emoji + ' ' + t.label + '</option>').join('');
+  if (atual) sel.value = atual;
+  // Atualizar constantes em memória
+  lista.forEach(t => {
+    TIPO_LABEL[t.valor] = t.label;
+    TIPO_TAG[t.valor]   = 'tag-' + t.valor;
+  });
+}
+
+let _gerenciarChave = null;
+
+function abrirGerenciar(chave) {
+  _gerenciarChave = chave;
+  document.getElementById('gerenciar-titulo').textContent =
+    chave === 'responsaveis' ? '👤 Gerenciar Responsáveis' : '🏷️ Gerenciar Tipos de Trabalho';
+  document.getElementById('gerenciar-input').value = '';
+  renderGerenciarLista();
+  abrirModal('modal-gerenciar');
+}
+window.abrirGerenciar = abrirGerenciar;
+
+function renderGerenciarLista() {
+  const lista  = getLista(_gerenciarChave);
+  const container = document.getElementById('gerenciar-lista');
+  container.innerHTML = '';
+
+  if (!lista.length) {
+    container.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:16px">Nenhum item cadastrado</div>';
+    return;
+  }
+
+  lista.forEach((item, idx) => {
+    const nome = _gerenciarChave === 'responsaveis' ? item : (item.emoji + ' ' + item.label);
+    const div  = document.createElement('div');
+    div.style.cssText = 'display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px';
+    div.innerHTML =
+      '<span style="flex:1;font-size:13px;font-weight:500">' + nome + '</span>' +
+      '<button onclick="removerItemLista(' + idx + ')" style="background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer">🗑️ Remover</button>';
+    container.appendChild(div);
+  });
+}
+
+function adicionarItemLista() {
+  const input = document.getElementById('gerenciar-input');
+  const val   = input.value.trim();
+  if (!val) { toast('⚠️ Digite um nome para adicionar.'); return; }
+
+  const lista = getLista(_gerenciarChave);
+
+  if (_gerenciarChave === 'responsaveis') {
+    if (lista.includes(val)) { toast('⚠️ Responsável já existe.'); return; }
+    lista.push(val);
+  } else {
+    // Gerar valor slug para tipos
+    const slug  = val.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/__+/g, '_');
+    if (lista.find(t => t.valor === slug || t.label === val)) { toast('⚠️ Tipo já existe.'); return; }
+    const emojis = ['⚪','🔴','🟤','🔶','🔷','🟦','🟩','🟨','🟧','🟥'];
+    const emoji  = emojis[lista.length % emojis.length];
+    lista.push({ valor: slug, emoji, label: val });
+  }
+
+  salvarLista(_gerenciarChave, lista);
+  input.value = '';
+  renderGerenciarLista();
+  // Atualizar selects
+  if (_gerenciarChave === 'responsaveis') preencherSelectResp();
+  else preencherSelectTipo();
+  toast('✅ Item adicionado!');
+}
+window.adicionarItemLista = adicionarItemLista;
+
+function removerItemLista(idx) {
+  const lista = getLista(_gerenciarChave);
+  const nome  = _gerenciarChave === 'responsaveis' ? lista[idx] : lista[idx].label;
+  if (!confirm('Remover "' + nome + '"?')) return;
+  lista.splice(idx, 1);
+  salvarLista(_gerenciarChave, lista);
+  renderGerenciarLista();
+  if (_gerenciarChave === 'responsaveis') preencherSelectResp();
+  else preencherSelectTipo();
+  toast('🗑️ Item removido.');
+}
+window.removerItemLista = removerItemLista;
 
 function abrirChangelog() { abrirModal('modal-changelog'); }
 window.abrirChangelog = abrirChangelog;
