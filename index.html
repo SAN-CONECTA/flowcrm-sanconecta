@@ -447,7 +447,7 @@ tr:hover td{background:var(--surface2)}
       </div>
       <div class="login-footer">Já tem conta? <a onclick="switchTab('entrar')">Entrar</a></div>
     </div>
-    <div class="login-version">SAN TECNOLOGIA — v3.0.3</div>
+    <div class="login-version">SAN TECNOLOGIA — v3.1.0</div>
   </div>
 </div>
 
@@ -472,7 +472,7 @@ tr:hover td{background:var(--surface2)}
       </div>
       <div class="user-menu" id="user-menu">
         <div class="user-menu-item" onclick="abrirTrocarSenha()">🔑 Trocar Senha</div>
-        <div class="user-menu-item" id="menu-changelog" onclick="abrirChangelog()">📋 v3.0.3 — Changelog</div>
+        <div class="user-menu-item" id="menu-changelog" onclick="abrirChangelog()">📋 v3.1.0 — Changelog</div>
         <div class="user-menu-divider"></div>
         <div style="padding:6px 8px 2px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">🎨 Tema</div>
         <div class="theme-picker">
@@ -703,9 +703,32 @@ tr:hover td{background:var(--surface2)}
               <option value="nao_fechamento">Não Fechamento</option>
             </select>
           </div>
+          <div class="form-group">
+            <label>Origem</label>
+            <select class="input" id="b-origem" onchange="executarBusca()">
+              <option value="">Todas</option>
+              <option value="indicacao">🤝 Indicação</option>
+              <option value="prospecção">📞 Prospecção Ativa</option>
+              <option value="inbound">🌐 Inbound / Site</option>
+              <option value="redes_sociais">📱 Redes Sociais</option>
+              <option value="evento">🎯 Evento / Feira</option>
+              <option value="parceiro">🔗 Parceiro</option>
+              <option value="retorno">🔄 Retorno de Cliente</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Probabilidade (mín.)</label>
+            <select class="input" id="b-prob" onchange="executarBusca()">
+              <option value="">Qualquer</option>
+              <option value="25">25%+</option>
+              <option value="50">50%+</option>
+              <option value="75">75%+</option>
+              <option value="90">90%+</option>
+            </select>
+          </div>
           <div class="form-group" style="grid-column:1/-1">
-            <label>Observações (contém)</label>
-            <input class="input" id="b-obs" placeholder="Buscar nas observações..." oninput="executarBusca()">
+            <label>Observações / Próxima Ação (contém)</label>
+            <input class="input" id="b-obs" placeholder="Buscar nas observações ou próxima ação..." oninput="executarBusca()">
           </div>
         </div>
       </div>
@@ -726,7 +749,7 @@ tr:hover td{background:var(--surface2)}
 <!-- FOOTER -->
 <div id="app-footer">
   <span>SAN CONECTA LTDA · Sinop/MT</span>
-  <span class="ver" onclick="abrirChangelog()">v3.0.3</span>
+  <span class="ver" onclick="abrirChangelog()">v3.1.0</span>
   <span>Firebase · GitHub Pages</span>
 </div>
 
@@ -743,6 +766,20 @@ tr:hover td{background:var(--surface2)}
       <div class="form-group"><label>Empresa</label><input class="input" id="f-empresa" placeholder="Ex: Acme Ltda"></div>
       <div class="form-group"><label>Telefone / WhatsApp</label><input class="input" id="f-tel" placeholder="(66) 9xxxx-xxxx"></div>
       <div class="form-group"><label>E-mail</label><input class="input" id="f-email" type="email" placeholder="contato@empresa.com"></div>
+      <div class="form-group"><label>CNPJ</label><input class="input" id="f-cnpj" placeholder="00.000.000/0001-00" oninput="mascaraCNPJ(this)"></div>
+      <div class="form-group"><label>Origem do Lead</label>
+        <select class="input" id="f-origem">
+          <option value="">Selecione...</option>
+          <option value="indicacao">🤝 Indicação</option>
+          <option value="prospecção">📞 Prospecção Ativa</option>
+          <option value="inbound">🌐 Inbound / Site</option>
+          <option value="redes_sociais">📱 Redes Sociais</option>
+          <option value="evento">🎯 Evento / Feira</option>
+          <option value="parceiro">🔗 Parceiro</option>
+          <option value="retorno">🔄 Retorno de Cliente</option>
+          <option value="outro">📌 Outro</option>
+        </select>
+      </div>
       <div class="form-group"><label>Etapa</label>
         <select class="input" id="f-etapa">
           <option value="reuniao">📋 Reunião Inicial</option>
@@ -753,8 +790,42 @@ tr:hover td{background:var(--surface2)}
         </select>
       </div>
       <div class="form-group"><label>Valor Estimado (R$)</label><input class="input" id="f-valor" placeholder="0,00" inputmode="numeric" oninput="mascaraValor(this)"></div>
+      <div class="form-group"><label>Valor da Proposta (R$)</label><input class="input" id="f-valor-proposta" placeholder="0,00" inputmode="numeric" oninput="mascaraValor(this)"></div>
+      <div class="form-group"><label>Receita Recorrente</label>
+        <select class="input" id="f-recorrente">
+          <option value="pontual">💰 Pontual (Projeto)</option>
+          <option value="mensal">🔁 Mensal (MRR)</option>
+          <option value="anual">📅 Anual</option>
+          <option value="indefinido">❓ A definir</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Probabilidade de Fechamento</label>
+        <select class="input" id="f-prob">
+          <option value="">Não definida</option>
+          <option value="10">🔴 10% — Muito baixa</option>
+          <option value="25">🟠 25% — Baixa</option>
+          <option value="50">🟡 50% — Média</option>
+          <option value="75">🔵 75% — Alta</option>
+          <option value="90">🟢 90% — Muito alta</option>
+          <option value="100">✅ 100% — Fechado</option>
+        </select>
+      </div>
       <div class="form-group"><label>Data do Próximo Contato</label><input class="input" id="f-data" type="date"></div>
       <div class="form-group"><label>Hora</label><input class="input" id="f-hora" type="time"></div>
+      <div class="form-group span-2"><label>Próxima Ação</label><input class="input" id="f-proxima-acao" placeholder="Ex: Enviar proposta, Agendar reunião técnica..."></div>
+      <div class="form-group span-2"><label>Motivo de Perda <span style="color:var(--muted);font-weight:400;font-size:11px">(preencher se Não Fechamento)</span></label>
+        <select class="input" id="f-motivo-perda">
+          <option value="">—</option>
+          <option value="preco">💸 Preço / Orçamento</option>
+          <option value="concorrente">🏁 Escolheu concorrente</option>
+          <option value="sem_budget">🚫 Sem budget no momento</option>
+          <option value="nao_prioridade">⏸️ Não é prioridade agora</option>
+          <option value="solucao_interna">🔧 Resolveu internamente</option>
+          <option value="contato_perdido">📵 Contato perdido</option>
+          <option value="projeto_cancelado">❌ Projeto cancelado</option>
+          <option value="outro">📌 Outro motivo</option>
+        </select>
+      </div>
       <div class="form-group span-2"><label>Observações</label><textarea class="input" id="f-obs" placeholder="Detalhes, necessidades, histórico..."></textarea></div>
       <div class="form-group"><label>Prioridade</label>
         <select class="input" id="f-prio">
@@ -897,8 +968,25 @@ tr:hover td{background:var(--surface2)}
     <div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:20px">
       <div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <span class="tag tag-purple" style="font-size:12px">v3.1.0</span>
+          <span style="font-size:12px;color:var(--muted)">20/11/2026 — Versão atual</span>
+        </div>
+        <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
+          <div>🆕 CNPJ com máscara automática</div>
+          <div>🆕 Origem do Lead (8 opções)</div>
+          <div>🆕 Valor da Proposta separado do Estimado</div>
+          <div>🆕 Tipo de Receita: Pontual / MRR / Anual</div>
+          <div>🆕 Probabilidade de Fechamento (10%–100%)</div>
+          <div>🆕 Campo Próxima Ação obrigatório</div>
+          <div>🆕 Motivo de Perda (8 categorias)</div>
+          <div>🆕 Busca avançada com filtro de Origem e Probabilidade</div>
+          <div>🆕 Detalhe do lead expandido com todos os novos dados</div>
+        </div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
           <span class="tag tag-purple" style="font-size:12px">v3.0.3</span>
-          <span style="font-size:12px;color:var(--muted)">24/04/2026 — Versão atual</span>
+          <span style="font-size:12px;color:var(--muted)">24/04/2026</span>
         </div>
         <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
           <div>✅ Reconstrução completa do sistema</div>
@@ -1369,6 +1457,13 @@ function abrirModalLead(id) {
     document.getElementById('f-email').value   = l.email   || '';
     document.getElementById('f-etapa').value   = l.etapa   || 'reuniao';
     document.getElementById('f-valor').value   = l.valor   ? fmtValor(l.valor) : '';
+    document.getElementById('f-valor-proposta').value = l.valorProposta ? fmtValor(l.valorProposta) : '';
+    document.getElementById('f-cnpj').value    = l.cnpj    || '';
+    document.getElementById('f-origem').value  = l.origem  || '';
+    document.getElementById('f-recorrente').value = l.recorrente || 'pontual';
+    document.getElementById('f-prob').value    = l.prob    || '';
+    document.getElementById('f-proxima-acao').value = l.proximaAcao || '';
+    document.getElementById('f-motivo-perda').value = l.motivoPerda || '';
     document.getElementById('f-data').value    = l.data    || '';
     document.getElementById('f-hora').value    = l.hora    || '';
     document.getElementById('f-obs').value     = l.obs     || '';
@@ -1377,10 +1472,14 @@ function abrirModalLead(id) {
     preencherSelectTipo(); document.getElementById('f-tipo').value = l.tipo || 'consultoria';
     carregarAnexos(id);
   } else {
-    ['f-nome','f-empresa','f-tel','f-email','f-valor','f-data','f-hora','f-obs','f-resp'].forEach(x => { document.getElementById(x).value = ''; });
+    ['f-nome','f-empresa','f-tel','f-email','f-cnpj','f-valor','f-valor-proposta','f-proxima-acao','f-data','f-hora','f-obs','f-resp'].forEach(x => { document.getElementById(x).value = ''; });
     document.getElementById('f-etapa').value = 'reuniao';
     document.getElementById('f-prio').value  = 'normal';
     document.getElementById('f-tipo').value  = 'consultoria';
+    document.getElementById('f-origem').value = '';
+    document.getElementById('f-recorrente').value = 'pontual';
+    document.getElementById('f-prob').value = '';
+    document.getElementById('f-motivo-perda').value = '';
     document.getElementById('anexos-list').innerHTML = '';
   }
   preencherSelectResp();
@@ -1394,18 +1493,25 @@ async function salvarLead() {
   if (!nome) { toast('⚠️ Preencha o nome do contato.'); return; }
   const dados = {
     nome,
-    empresa: document.getElementById('f-empresa').value.trim(),
-    tel:     document.getElementById('f-tel').value.trim(),
-    email:   document.getElementById('f-email').value.trim(),
-    etapa:   document.getElementById('f-etapa').value,
-    valor:   parseBRL(document.getElementById('f-valor').value),
-    data:    document.getElementById('f-data').value,
-    hora:    document.getElementById('f-hora').value,
-    obs:     document.getElementById('f-obs').value.trim(),
-    prio:    document.getElementById('f-prio').value,
-    resp:    document.getElementById('f-resp').value.trim(),
-    tipo:    document.getElementById('f-tipo').value,
-    updatedAt: new Date().toISOString()
+    empresa:       document.getElementById('f-empresa').value.trim(),
+    tel:           document.getElementById('f-tel').value.trim(),
+    email:         document.getElementById('f-email').value.trim(),
+    cnpj:          document.getElementById('f-cnpj').value.trim(),
+    origem:        document.getElementById('f-origem').value,
+    etapa:         document.getElementById('f-etapa').value,
+    valor:         parseBRL(document.getElementById('f-valor').value),
+    valorProposta: parseBRL(document.getElementById('f-valor-proposta').value),
+    recorrente:    document.getElementById('f-recorrente').value,
+    prob:          document.getElementById('f-prob').value,
+    proximaAcao:   document.getElementById('f-proxima-acao').value.trim(),
+    motivoPerda:   document.getElementById('f-motivo-perda').value,
+    data:          document.getElementById('f-data').value,
+    hora:          document.getElementById('f-hora').value,
+    obs:           document.getElementById('f-obs').value.trim(),
+    prio:          document.getElementById('f-prio').value,
+    resp:          document.getElementById('f-resp').value.trim(),
+    tipo:          document.getElementById('f-tipo').value,
+    updatedAt:     new Date().toISOString()
   };
   try {
     if (editLeadId) {
@@ -1438,14 +1544,21 @@ function abrirDetalhe(id) {
       ${l.prio !== 'normal' ? '<span class="tag ' + PRIO_TAG[l.prio] + '">' + l.prio + '</span>' : ''}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
-      ${l.empresa ? '<div><span style="color:var(--muted)">Empresa</span><br><strong>' + l.empresa + '</strong></div>' : ''}
-      ${l.tel     ? '<div><span style="color:var(--muted)">Telefone</span><br><strong>' + l.tel + '</strong></div>' : ''}
-      ${l.email   ? '<div><span style="color:var(--muted)">E-mail</span><br><strong>' + l.email + '</strong></div>' : ''}
-      ${l.valor   ? '<div><span style="color:var(--muted)">Valor</span><br><strong>R$ ' + fmtValor(l.valor) + '</strong></div>' : ''}
-      ${l.data    ? '<div><span style="color:var(--muted)">Próx. Contato</span><br><strong>' + fmtData(l.data) + (l.hora ? ' às ' + l.hora : '') + '</strong></div>' : ''}
-      ${l.resp    ? '<div><span style="color:var(--muted)">Responsável</span><br><strong>' + l.resp + '</strong></div>' : ''}
+      ${l.empresa       ? '<div><span style="color:var(--muted)">Empresa</span><br><strong>' + l.empresa + '</strong></div>' : ''}
+      ${l.cnpj          ? '<div><span style="color:var(--muted)">CNPJ</span><br><strong>' + l.cnpj + '</strong></div>' : ''}
+      ${l.tel           ? '<div><span style="color:var(--muted)">Telefone</span><br><strong>' + l.tel + '</strong></div>' : ''}
+      ${l.email         ? '<div><span style="color:var(--muted)">E-mail</span><br><strong>' + l.email + '</strong></div>' : ''}
+      ${l.origem        ? '<div><span style="color:var(--muted)">Origem</span><br><strong>' + {indicacao:'🤝 Indicação',prospecção:'📞 Prospecção',inbound:'🌐 Inbound',redes_sociais:'📱 Redes Sociais',evento:'🎯 Evento',parceiro:'🔗 Parceiro',retorno:'🔄 Retorno',outro:'📌 Outro'}[l.origem] + '</strong></div>' : ''}
+      ${l.resp          ? '<div><span style="color:var(--muted)">Responsável</span><br><strong>' + l.resp + '</strong></div>' : ''}
+      ${l.valor         ? '<div><span style="color:var(--muted)">Valor Estimado</span><br><strong>R$ ' + fmtValor(l.valor) + '</strong></div>' : ''}
+      ${l.valorProposta ? '<div><span style="color:var(--muted)">Valor da Proposta</span><br><strong>R$ ' + fmtValor(l.valorProposta) + '</strong></div>' : ''}
+      ${l.recorrente && l.recorrente !== 'indefinido' ? '<div><span style="color:var(--muted)">Receita</span><br><strong>' + {pontual:'💰 Pontual',mensal:'🔁 Mensal (MRR)',anual:'📅 Anual'}[l.recorrente] + '</strong></div>' : ''}
+      ${l.prob          ? '<div><span style="color:var(--muted)">Probabilidade</span><br><strong>' + l.prob + '% de fechamento</strong></div>' : ''}
+      ${l.data          ? '<div><span style="color:var(--muted)">Próx. Contato</span><br><strong>' + fmtData(l.data) + (l.hora ? ' às ' + l.hora : '') + '</strong></div>' : ''}
     </div>
-    ${l.obs ? '<div style="margin-top:12px;font-size:13px"><span style="color:var(--muted)">Observações</span><br>' + l.obs + '</div>' : ''}`;
+    ${l.proximaAcao   ? '<div style="margin-top:12px;font-size:13px;padding:10px;background:rgba(108,99,255,0.1);border-radius:8px;border-left:3px solid var(--accent)"><span style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Próxima Ação</span><br><strong>' + l.proximaAcao + '</strong></div>' : ''}
+    ${l.motivoPerda   ? '<div style="margin-top:8px;font-size:13px;padding:10px;background:rgba(239,68,68,0.1);border-radius:8px;border-left:3px solid var(--red)"><span style="color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.5px">Motivo de Perda</span><br><strong>' + {preco:'💸 Preço',concorrente:'🏁 Concorrente',sem_budget:'🚫 Sem budget',nao_prioridade:'⏸️ Não prioridade',solucao_interna:'🔧 Solução interna',contato_perdido:'📵 Contato perdido',projeto_cancelado:'❌ Projeto cancelado',outro:'📌 Outro'}[l.motivoPerda] + '</strong></div>' : ''}
+    ${l.obs           ? '<div style="margin-top:8px;font-size:13px"><span style="color:var(--muted)">Observações</span><br>' + l.obs + '</div>' : ''}`;
 
   document.getElementById('detalhe-editar').onclick  = () => { fecharModal('modal-detalhe'); abrirModalLead(id); };
   document.getElementById('detalhe-excluir').onclick = () => confirmarExclusao(id, l.nome);
@@ -1720,6 +1833,16 @@ function mascaraValor(el) {
   el.value = parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
 }
 window.mascaraValor = mascaraValor;
+
+function mascaraCNPJ(el) {
+  let v = el.value.replace(/\D/g,'').slice(0,14);
+  if(v.length > 12) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5');
+  else if(v.length > 8) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d+)$/,'$1.$2.$3/$4');
+  else if(v.length > 5) v = v.replace(/^(\d{2})(\d{3})(\d+)$/,'$1.$2.$3');
+  else if(v.length > 2) v = v.replace(/^(\d{2})(\d+)$/,'$1.$2');
+  el.value = v;
+}
+window.mascaraCNPJ = mascaraCNPJ;
 
 /* ══════════════════════════════════════════
    USUÁRIOS
@@ -2138,7 +2261,7 @@ function preencherFiltrosBusca() {
 
 function limparBusca() {
   ['b-nome','b-empresa','b-obs'].forEach(id => { document.getElementById(id).value = ''; });
-  ['b-resp','b-tipo','b-prio','b-etapa'].forEach(id => { document.getElementById(id).value = ''; });
+  ['b-resp','b-tipo','b-prio','b-etapa','b-origem','b-prob'].forEach(id => { document.getElementById(id).value = ''; });
   executarBusca();
 }
 window.limparBusca = limparBusca;
@@ -2151,15 +2274,19 @@ function executarBusca() {
   const prio   = document.getElementById('b-prio').value;
   const etapa  = document.getElementById('b-etapa').value;
   const obs    = document.getElementById('b-obs').value.trim().toLowerCase();
+  const origem = document.getElementById('b-origem').value;
+  const prob   = document.getElementById('b-prob').value;
 
   let resultado = leads.filter(l => {
-    if (nome  && !(l.nome    || '').toLowerCase().includes(nome))    return false;
-    if (emp   && !(l.empresa || '').toLowerCase().includes(emp))     return false;
-    if (resp  && l.resp  !== resp)  return false;
-    if (tipo  && l.tipo  !== tipo)  return false;
-    if (prio  && l.prio  !== prio)  return false;
-    if (etapa && l.etapa !== etapa) return false;
-    if (obs   && !(l.obs || '').toLowerCase().includes(obs)) return false;
+    if (nome   && !(l.nome    || '').toLowerCase().includes(nome))    return false;
+    if (emp    && !(l.empresa || '').toLowerCase().includes(emp))     return false;
+    if (resp   && l.resp   !== resp)   return false;
+    if (tipo   && l.tipo   !== tipo)   return false;
+    if (prio   && l.prio   !== prio)   return false;
+    if (etapa  && l.etapa  !== etapa)  return false;
+    if (origem && l.origem !== origem) return false;
+    if (prob   && (parseInt(l.prob||0) < parseInt(prob))) return false;
+    if (obs    && !((l.obs||'') + ' ' + (l.proximaAcao||'')).toLowerCase().includes(obs)) return false;
     return true;
   });
 
