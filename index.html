@@ -802,7 +802,7 @@ tr:hover td{background:var(--surface2)}
     </div>
 
     <!-- MODAL LANÇAMENTO FINANCEIRO -->
-    <div class="modal-overlay hidden" id="modal-lancamento" onclick="if(event.target===this)fecharModal('modal-lancamento')">
+    <div class="modal-overlay" id="modal-lancamento" onclick="if(event.target===this)fecharModal('modal-lancamento')">
       <div class="modal" style="max-width:520px">
         <div class="modal-header">
           <h2 class="modal-title" id="modal-lanc-title">＋ Novo Lançamento</h2>
@@ -4666,7 +4666,7 @@ function abrirModalLancamento(id) {
     document.getElementById('lanc-obs').value         = '';
   }
   atualizarTipoLanc();
-  m.classList.remove('hidden');
+  m.classList.add('open');
 }
 window.abrirModalLancamento = abrirModalLancamento;
 
