@@ -580,7 +580,7 @@ tr:hover td{background:var(--surface2)}
       </div>
       <div class="login-footer">Já tem conta? <a onclick="switchTab('entrar')">Entrar</a></div>
     </div>
-    <div class="login-version">SAN TECNOLOGIA — v3.7.0</div>
+    <div class="login-version">SAN TECNOLOGIA — v3.7.1</div>
   </div>
 </div>
 
@@ -605,7 +605,7 @@ tr:hover td{background:var(--surface2)}
       </div>
       <div class="user-menu" id="user-menu">
         <div class="user-menu-item" onclick="abrirTrocarSenha()">🔑 Trocar Senha</div>
-        <div class="user-menu-item" id="menu-changelog" onclick="abrirChangelog()">📋 v3.7.0 — Changelog</div>
+        <div class="user-menu-item" id="menu-changelog" onclick="abrirChangelog()">📋 v3.7.1 — Changelog</div>
         <div class="user-menu-divider"></div>
         <div style="padding:6px 8px 2px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">🎨 Tema</div>
         <div class="theme-picker">
@@ -1518,7 +1518,7 @@ tr:hover td{background:var(--surface2)}
 <!-- FOOTER -->
 <div id="app-footer">
   <span>SAN CONECTA LTDA · Sinop/MT</span>
-  <span class="ver" onclick="abrirChangelog()">v3.7.0</span>
+  <span class="ver" onclick="abrirChangelog()">v3.7.1</span>
   <span>Firebase · GitHub Pages</span>
 </div>
 
@@ -1737,7 +1737,7 @@ tr:hover td{background:var(--surface2)}
     <div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:20px">
       <div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <span class="tag tag-purple" style="font-size:12px">v3.7.0</span>
+          <span class="tag tag-purple" style="font-size:12px">v3.7.1</span>
           <span style="font-size:12px;color:var(--muted)">20/11/2026 — Versão atual</span>
         </div>
         <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
@@ -3911,7 +3911,7 @@ async function excluirContrato(id) {
 window.excluirContrato = excluirContrato;
 
 /* ══════════════════════════════════════════
-   PAINEL EXECUTIVO — v3.7.0
+   PAINEL EXECUTIVO — v3.7.1
 ══════════════════════════════════════════ */
 
 function inicializarFiltrosExec() {
@@ -4189,7 +4189,7 @@ function renderExec() {
 window.renderExec = renderExec;
 
 /* ══════════════════════════════════════════
-   IMPORTAÇÃO DE PLANILHAS — v3.7.0
+   IMPORTAÇÃO DE PLANILHAS — v3.7.1
 ══════════════════════════════════════════ */
 
 // Carrega SheetJS dinamicamente (CDN)
@@ -4578,7 +4578,7 @@ function abrirHistoricoImportacoes() {
     ? `<div class="alerta-row alerta-yellow" style="justify-content:space-between;align-items:center;margin-top:8px">
         <div>
           <div style="font-weight:600;font-size:13px">⚠️ ${semMarcador.length} leads criados hoje sem marcador de lote</div>
-          <div style="font-size:11px;color:var(--muted)">Provavelmente importados antes da v3.7.0</div>
+          <div style="font-size:11px;color:var(--muted)">Provavelmente importados antes da v3.7.1</div>
         </div>
         <button class="btn btn-ghost" style="color:var(--red);font-size:12px" onclick="desfazerSemMarcador(${semMarcador.length},this.closest('.alerta-row'))">🗑️ Excluir estes</button>
       </div>`
@@ -4595,7 +4595,7 @@ function abrirHistoricoImportacoes() {
 }
 window.abrirHistoricoImportacoes = abrirHistoricoImportacoes;
 
-// Exclui leads criados hoje sem marcador importLote (importações legadas antes da v3.7.0)
+// Exclui leads criados hoje sem marcador importLote (importações legadas antes da v3.7.1)
 async function desfazerSemMarcador(total, rowEl) {
   if (!confirm(`⚠️ Isso vai excluir ${total} lead(s) criados hoje sem marcador de lote.\n\nTem certeza?`)) return;
   if (rowEl) { const btn = rowEl.querySelector('button'); if (btn) { btn.disabled = true; btn.textContent = '⏳ Excluindo...'; } }
@@ -4615,7 +4615,7 @@ async function desfazerSemMarcador(total, rowEl) {
 window.desfazerSemMarcador = desfazerSemMarcador;
 
 /* ══════════════════════════════════════════
-   FINANCEIRO — v3.7.0
+   FINANCEIRO — v3.7.1
 ══════════════════════════════════════════ */
 function iniciarListenerFinanceiro() {
   onSnapshot(collection(db, 'financeiro'), snap => {
@@ -5025,7 +5025,7 @@ function renderHistoricoCliente() {
 window.renderHistoricoCliente = renderHistoricoCliente;
 
 /* ══════════════════════════════════════════
-   PARCEIROS — v3.7.0
+   PARCEIROS — v3.7.1
 ══════════════════════════════════════════ */
 function iniciarListenerParceiros() {
   onSnapshot(collection(db, 'parceiros'), snap => {
