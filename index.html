@@ -590,7 +590,7 @@ tr:hover td{background:var(--surface2)}
       </div>
       <div class="login-footer">Já tem conta? <a onclick="switchTab('entrar')">Entrar</a></div>
     </div>
-    <div class="login-version">SAN TECNOLOGIA — v3.8.2</div>
+    <div class="login-version">SAN TECNOLOGIA — v3.8.3</div>
   </div>
 </div>
 
@@ -1605,7 +1605,7 @@ tr:hover td{background:var(--surface2)}
 <!-- FOOTER -->
 <div id="app-footer">
   <span>SAN CONECTA LTDA · Sinop/MT</span>
-  <span class="ver" onclick="abrirChangelog()">v3.8.2</span>
+  <span class="ver" onclick="abrirChangelog()">v3.8.3</span>
   <span>Firebase · GitHub Pages</span>
 </div>
 
@@ -1755,7 +1755,7 @@ tr:hover td{background:var(--surface2)}
 
 <!-- Modal Editar Usuário -->
 <div class="modal-overlay" id="modal-editar-usuario">
-  <div class="modal" style="max-width:420px">
+  <div class="modal" style="max-width:500px">
     <div class="modal-title">✏️ Editar Usuário</div>
     <div class="form-grid">
       <div class="form-group"><label>Nome</label><input class="input" id="eu-nome" placeholder="Nome completo"></div>
@@ -1764,6 +1764,24 @@ tr:hover td{background:var(--surface2)}
           <option value="vendedor">👤 Vendedor</option>
           <option value="admin">👑 Admin</option>
         </select>
+      </div>
+    </div>
+    <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+      <div class="card-title" style="margin-bottom:4px">Acesso ao Menu</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Desative para esconder páginas deste usuário</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 16px">
+        <div class="perm-row"><div class="perm-label">📊 Dashboard</div><label class="toggle"><input type="checkbox" id="eu-p-dashboard"><div class="toggle-slider"></div></label></div>
+        <div class="perm-row"><div class="perm-label">🔀 Pipeline</div><label class="toggle"><input type="checkbox" id="eu-p-pipeline"><div class="toggle-slider"></div></label></div>
+        <div class="perm-row"><div class="perm-label">📅 Agenda</div><label class="toggle"><input type="checkbox" id="eu-p-agenda"><div class="toggle-slider"></div></label></div>
+        <div class="perm-row"><div class="perm-label">👥 Clientes</div><label class="toggle"><input type="checkbox" id="eu-p-clientes"><div class="toggle-slider"></div></label></div>
+        <div class="perm-row"><div class="perm-label">🔔 Alertas</div><label class="toggle"><input type="checkbox" id="eu-p-alertas"><div class="toggle-slider"></div></label></div>
+        <div class="perm-row"><div class="perm-label">🔍 Busca</div><label class="toggle"><input type="checkbox" id="eu-p-busca"><div class="toggle-slider"></div></label></div>
+        <div class="perm-row"><div class="perm-label">🤝 Parceiros</div><label class="toggle"><input type="checkbox" id="eu-p-parceiros"><div class="toggle-slider"></div></label></div>
+        <div class="perm-row"><div class="perm-label">📋 Ordens de Serviço</div><label class="toggle"><input type="checkbox" id="eu-p-ordens"><div class="toggle-slider"></div></label></div>
+        <div class="perm-row"><div class="perm-label">📄 Contratos</div><label class="toggle"><input type="checkbox" id="eu-p-contratos"><div class="toggle-slider"></div></label></div>
+        <div class="perm-row"><div class="perm-label">💰 Financeiro</div><label class="toggle"><input type="checkbox" id="eu-p-financeiro"><div class="toggle-slider"></div></label></div>
+        <div class="perm-row"><div class="perm-label">💹 Fin. Executivo</div><label class="toggle"><input type="checkbox" id="eu-p-finexec"><div class="toggle-slider"></div></label></div>
+        <div class="perm-row"><div class="perm-label">📊 Painel Executivo</div><label class="toggle"><input type="checkbox" id="eu-p-exec"><div class="toggle-slider"></div></label></div>
       </div>
     </div>
     <div class="login-error" id="eu-error"></div>
@@ -1845,7 +1863,7 @@ tr:hover td{background:var(--surface2)}
     <div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:20px">
       <div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <span class="tag tag-purple" style="font-size:12px">v3.8.2</span>
+          <span class="tag tag-purple" style="font-size:12px">v3.8.3</span>
           <span style="font-size:12px;color:var(--muted)">20/11/2026 — Versão atual</span>
         </div>
         <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
@@ -2189,7 +2207,8 @@ onAuthStateChanged(auth, async user => {
       email: user.email,
       nome:  perfil?.nome  || user.email.split('@')[0],
       role:  perfil?.role  || (user.email === ADMIN_EMAIL ? 'admin' : 'vendedor'),
-      tipos: perfil?.tiposPermitidos || { consultoria:true, trust:true, infra:true, outros:true }
+      tipos: perfil?.tiposPermitidos || { consultoria:true, trust:true, infra:true, outros:true },
+      paginas: perfil?.paginasPermitidas || null
     };
   } catch(e) {
     if (_loginErr) { _loginErr.textContent = '⚠️ Erro Firestore: ' + e.message; _loginErr.style.color='#f97316'; _loginErr.style.display='block'; }
@@ -2218,6 +2237,23 @@ onAuthStateChanged(auth, async user => {
   document.getElementById('nav-admin-label').style.display = adm ? '' : 'none';
   document.getElementById('nav-usuarios').classList.toggle('hidden', !adm);
   document.getElementById('nav-auditoria').classList.toggle('hidden', !adm);
+
+  // Permissões de páginas por usuário (admin master: acesso total)
+  if (!adm && currentUser.paginas) {
+    const pp = currentUser.paginas;
+    const PAGINAS_NAV = {
+      dashboard: null, pipeline: null, agenda: null, clientes: null,
+      alertas: null, busca: null, parceiros: null,
+      ordens: 'nav-os', contratos: 'nav-contratos',
+      financeiro: 'nav-financeiro', finexec: 'nav-finexec', exec: 'nav-exec'
+    };
+    Object.entries(PAGINAS_NAV).forEach(([page, navId]) => {
+      const el = navId
+        ? document.getElementById(navId)
+        : document.querySelector('[data-page="' + page + '"]');
+      if (el) el.classList.toggle('hidden', pp[page] === false);
+    });
+  }
 
   // Snapshot leads (apenas uma vez)
   if (!snapshotAtivo) {
@@ -2949,13 +2985,20 @@ async function excluirUsuario(id, nome) {
 }
 window.excluirUsuario = excluirUsuario;
 
+const EU_PAGINAS = ['dashboard','pipeline','agenda','clientes','alertas','busca','parceiros','ordens','contratos','financeiro','finexec','exec'];
 let editUsuarioId = null;
 function abrirEditarUsuario(id) {
   const u = usuarios.find(x => x.id === id);
   if (!u) return;
   editUsuarioId = id;
-  document.getElementById('eu-nome').value  = u.nome  || '';
-  document.getElementById('eu-role').value  = u.role  || 'vendedor';
+  document.getElementById('eu-nome').value = u.nome || '';
+  document.getElementById('eu-role').value = u.role || 'vendedor';
+  // Carregar permissões de páginas (default: todas liberadas)
+  const pp = u.paginasPermitidas || {};
+  EU_PAGINAS.forEach(p => {
+    const el = document.getElementById('eu-p-' + p);
+    if (el) el.checked = pp[p] !== false; // default true
+  });
   document.getElementById('eu-error').style.display = 'none';
   abrirModal('modal-editar-usuario');
 }
@@ -2968,9 +3011,15 @@ async function salvarEdicaoUsuario() {
   const btn  = document.getElementById('eu-btn');
   err.style.display = 'none';
   if (!nome) { err.textContent='⚠️ Informe o nome.'; err.style.display='block'; return; }
+  // Coletar permissões de páginas
+  const paginasPermitidas = {};
+  EU_PAGINAS.forEach(p => {
+    const el = document.getElementById('eu-p-' + p);
+    if (el) paginasPermitidas[p] = el.checked;
+  });
   btn.disabled = true; btn.textContent='⏳ Salvando...';
   try {
-    await updateDoc(doc(db, 'usuarios', editUsuarioId), { nome, role });
+    await updateDoc(doc(db, 'usuarios', editUsuarioId), { nome, role, paginasPermitidas });
     logAudit('editar_usuario', 'Editado: ' + nome).catch(() => {});
     fecharModal('modal-editar-usuario');
     toast('✅ Usuário atualizado.');
