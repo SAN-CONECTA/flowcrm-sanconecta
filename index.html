@@ -197,6 +197,16 @@ textarea.input{resize:vertical;min-height:80px}
 .hist-cliente-header:hover{background:var(--surface2)}
 .hist-cliente-body{padding:0 16px 12px;display:none}
 .hist-cliente-body.open{display:block}
+.fe-bar-group{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:52px;flex:1}
+.fe-bar-wrap{display:flex;align-items:flex-end;gap:3px;width:100%;height:120px}
+.fe-bar{border-radius:3px 3px 0 0;min-height:4px;width:100%;transition:.3s}
+.fe-bar-rec{background:#6c63ff}
+.fe-bar-dep{background:#ef4444}
+.fe-bar-lbl{font-size:10px;color:var(--muted);text-align:center;white-space:nowrap}
+.fe-proj-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--surface2);border-radius:var(--radius-sm);margin-bottom:8px}
+.fe-proj-mes{font-weight:700;font-size:13px}
+.fe-proj-vals{display:flex;gap:16px;font-size:13px}
+.fe-proj-saldo{font-weight:900;font-size:15px}
 .fin-kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
 .fin-kpi .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
 .fin-kpi .val{font-size:18px;font-weight:700;margin-top:4px}
@@ -580,7 +590,7 @@ tr:hover td{background:var(--surface2)}
       </div>
       <div class="login-footer">Já tem conta? <a onclick="switchTab('entrar')">Entrar</a></div>
     </div>
-    <div class="login-version">SAN TECNOLOGIA — v3.7.1</div>
+    <div class="login-version">SAN TECNOLOGIA — v3.8.0</div>
   </div>
 </div>
 
@@ -605,7 +615,7 @@ tr:hover td{background:var(--surface2)}
       </div>
       <div class="user-menu" id="user-menu">
         <div class="user-menu-item" onclick="abrirTrocarSenha()">🔑 Trocar Senha</div>
-        <div class="user-menu-item" id="menu-changelog" onclick="abrirChangelog()">📋 v3.7.1 — Changelog</div>
+        <div class="user-menu-item" id="menu-changelog" onclick="abrirChangelog()">📋 v3.8.0 — Changelog</div>
         <div class="user-menu-divider"></div>
         <div style="padding:6px 8px 2px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">🎨 Tema</div>
         <div class="theme-picker">
@@ -663,6 +673,9 @@ tr:hover td{background:var(--surface2)}
     <div class="nav-item" id="nav-financeiro" data-page="financeiro" onclick="showPage('financeiro',this)">
       <span class="nav-icon">💰</span><span>Financeiro</span>
       <span class="nav-badge hidden" id="badge-financeiro">0</span>
+    </div>
+    <div class="nav-item" id="nav-finexec" data-page="finexec" onclick="showPage('finexec',this)">
+      <span class="nav-icon">💹</span><span>Fin. Executivo</span>
     </div>
     <div class="nav-item" id="nav-exec" data-page="exec" onclick="showPage('exec',this)">
       <span class="nav-icon">📊</span><span>Painel Executivo</span>
@@ -1113,6 +1126,77 @@ tr:hover td{background:var(--surface2)}
       <div id="os-lista"></div>
     </div>
 
+    <!-- PAINEL EXECUTIVO FINANCEIRO -->
+    <div class="page" id="page-finexec">
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">💹 FIN. EXECUTIVO</h1>
+          <p style="color:var(--muted);font-size:13px;margin-top:2px">Visão estratégica · Receita · Projeção · Metas</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <label style="font-size:12px;color:var(--muted)">Meta mensal (R$)</label>
+          <input id="finexec-meta" type="number" min="0" step="100" placeholder="0,00"
+            style="width:130px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 10px;color:var(--text);font-size:13px"
+            oninput="salvarMetaFinExec();renderFinExec()">
+        </div>
+      </div>
+
+      <!-- KPIs executivos -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:24px">
+        <div class="stat-card">
+          <div class="stat-label">MRR (Receita Recorrente)</div>
+          <div class="stat-value" id="fe-mrr">R$ 0</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px" id="fe-mrr-sub">contratos ativos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Ticket Médio</div>
+          <div class="stat-value" id="fe-ticket">R$ 0</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px" id="fe-ticket-sub">por contrato</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Margem Geral</div>
+          <div class="stat-value" id="fe-margem">0%</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">receita – despesas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Inadimplente Total</div>
+          <div class="stat-value" style="color:var(--red)" id="fe-inadim">R$ 0</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px" id="fe-inadim-sub">em aberto</div>
+        </div>
+      </div>
+
+      <!-- Meta mensal -->
+      <div class="card" style="margin-bottom:20px;padding:20px 24px" id="fe-meta-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-weight:700;font-size:14px">🎯 Meta do mês</div>
+          <div id="fe-meta-pct" style="font-weight:900;font-size:18px">0%</div>
+        </div>
+        <div style="background:var(--border);border-radius:4px;height:10px;overflow:hidden">
+          <div id="fe-meta-bar" style="height:100%;border-radius:4px;background:var(--primary);transition:.4s;width:0%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--muted)">
+          <span id="fe-meta-rec">Recebido: R$ 0</span>
+          <span id="fe-meta-alvo">Meta: R$ 0</span>
+        </div>
+      </div>
+
+      <!-- Gráfico receita x despesa -->
+      <div class="card" style="margin-bottom:20px;padding:20px 24px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:16px">📈 Receita × Despesa — últimos 6 meses</div>
+        <div id="fe-grafico" style="display:flex;align-items:flex-end;gap:8px;height:160px;overflow-x:auto"></div>
+        <div style="display:flex;gap:16px;margin-top:10px;font-size:12px">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:2px;background:#6c63ff;display:inline-block"></span>Receita</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;border-radius:2px;background:#ef4444;display:inline-block"></span>Despesa</span>
+        </div>
+      </div>
+
+      <!-- Projeção de caixa -->
+      <div class="card" style="padding:20px 24px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:16px">🔮 Projeção de caixa — próximos 3 meses</div>
+        <div id="fe-projecao"></div>
+      </div>
+    </div>
+
     <!-- PAINEL EXECUTIVO -->
     <div class="page" id="page-exec">
       <div class="page-header">
@@ -1518,7 +1602,7 @@ tr:hover td{background:var(--surface2)}
 <!-- FOOTER -->
 <div id="app-footer">
   <span>SAN CONECTA LTDA · Sinop/MT</span>
-  <span class="ver" onclick="abrirChangelog()">v3.7.1</span>
+  <span class="ver" onclick="abrirChangelog()">v3.8.0</span>
   <span>Firebase · GitHub Pages</span>
 </div>
 
@@ -1737,7 +1821,7 @@ tr:hover td{background:var(--surface2)}
     <div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:20px">
       <div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <span class="tag tag-purple" style="font-size:12px">v3.7.1</span>
+          <span class="tag tag-purple" style="font-size:12px">v3.8.0</span>
           <span style="font-size:12px;color:var(--muted)">20/11/2026 — Versão atual</span>
         </div>
         <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
@@ -2165,6 +2249,7 @@ function showPage(id, el) {
   if (id === 'exec')      renderExec();
   if (id === 'parceiros')  renderParceiros();
   if (id === 'financeiro') renderFinanceiro();
+  if (id === 'finexec')   renderFinExec();
 }
 window.showPage = showPage;
 
@@ -3911,7 +3996,7 @@ async function excluirContrato(id) {
 window.excluirContrato = excluirContrato;
 
 /* ══════════════════════════════════════════
-   PAINEL EXECUTIVO — v3.7.1
+   PAINEL EXECUTIVO — v3.8.0
 ══════════════════════════════════════════ */
 
 function inicializarFiltrosExec() {
@@ -4189,7 +4274,7 @@ function renderExec() {
 window.renderExec = renderExec;
 
 /* ══════════════════════════════════════════
-   IMPORTAÇÃO DE PLANILHAS — v3.7.1
+   IMPORTAÇÃO DE PLANILHAS — v3.8.0
 ══════════════════════════════════════════ */
 
 // Carrega SheetJS dinamicamente (CDN)
@@ -4578,7 +4663,7 @@ function abrirHistoricoImportacoes() {
     ? `<div class="alerta-row alerta-yellow" style="justify-content:space-between;align-items:center;margin-top:8px">
         <div>
           <div style="font-weight:600;font-size:13px">⚠️ ${semMarcador.length} leads criados hoje sem marcador de lote</div>
-          <div style="font-size:11px;color:var(--muted)">Provavelmente importados antes da v3.7.1</div>
+          <div style="font-size:11px;color:var(--muted)">Provavelmente importados antes da v3.8.0</div>
         </div>
         <button class="btn btn-ghost" style="color:var(--red);font-size:12px" onclick="desfazerSemMarcador(${semMarcador.length},this.closest('.alerta-row'))">🗑️ Excluir estes</button>
       </div>`
@@ -4595,7 +4680,7 @@ function abrirHistoricoImportacoes() {
 }
 window.abrirHistoricoImportacoes = abrirHistoricoImportacoes;
 
-// Exclui leads criados hoje sem marcador importLote (importações legadas antes da v3.7.1)
+// Exclui leads criados hoje sem marcador importLote (importações legadas antes da v3.8.0)
 async function desfazerSemMarcador(total, rowEl) {
   if (!confirm(`⚠️ Isso vai excluir ${total} lead(s) criados hoje sem marcador de lote.\n\nTem certeza?`)) return;
   if (rowEl) { const btn = rowEl.querySelector('button'); if (btn) { btn.disabled = true; btn.textContent = '⏳ Excluindo...'; } }
@@ -4615,7 +4700,7 @@ async function desfazerSemMarcador(total, rowEl) {
 window.desfazerSemMarcador = desfazerSemMarcador;
 
 /* ══════════════════════════════════════════
-   FINANCEIRO — v3.7.1
+   FINANCEIRO — v3.8.0
 ══════════════════════════════════════════ */
 function iniciarListenerFinanceiro() {
   onSnapshot(collection(db, 'financeiro'), snap => {
@@ -5025,7 +5110,126 @@ function renderHistoricoCliente() {
 window.renderHistoricoCliente = renderHistoricoCliente;
 
 /* ══════════════════════════════════════════
-   PARCEIROS — v3.7.1
+   PAINEL EXECUTIVO FINANCEIRO — v3.8.0
+══════════════════════════════════════════ */
+function salvarMetaFinExec() {
+  const v = document.getElementById('finexec-meta')?.value || '0';
+  try { localStorage.setItem('finexec_meta', v); } catch(e) {}
+}
+
+function renderFinExec() {
+  // Restaurar meta salva
+  try {
+    const saved = localStorage.getItem('finexec_meta');
+    const inp = document.getElementById('finexec-meta');
+    if (saved && inp && !inp.value) inp.value = saved;
+  } catch(e) {}
+
+  const fmt = v => 'R$ ' + (v||0).toLocaleString('pt-BR', {minimumFractionDigits:2});
+  const hoje = new Date();
+  const mesAtual = hoje.toISOString().slice(0,7);
+
+  /* ── KPIs ── */
+  // MRR = soma dos contratos ativos
+  const contratosAtivos = (contratos||[]).filter(c => c.status === 'ativo' || c.status === 'em_vigor' || !c.status);
+  const mrr = contratosAtivos.reduce((s,c) => s + (parseFloat((c.valor||c.mensalidade||'0').toString().replace(',','.')) || 0), 0);
+  const ticket = contratosAtivos.length ? mrr / contratosAtivos.length : 0;
+
+  // Margem geral (todos os lançamentos)
+  const totRec  = financeiro.filter(f => f.tipo==='receber' && f.status==='pago').reduce((s,f) => s+(f.valor||0), 0);
+  const totDesp = financeiro.filter(f => f.tipo==='pagar').reduce((s,f) => s+(f.valor||0), 0);
+  const margem  = totRec > 0 ? ((totRec - totDesp) / totRec * 100) : 0;
+  const margemCor = margem >= 50 ? 'var(--green)' : margem >= 20 ? '#f59e0b' : 'var(--red)';
+
+  // Inadimplente total
+  const inadim = financeiro.filter(f => f.tipo==='receber' && f.status!=='pago' && (f.vencimento||'') < mesAtual+'-01' ).reduce((s,f) => s+(f.valor||0),0);
+  const inadimCount = financeiro.filter(f => f.tipo==='receber' && f.status!=='pago' && (f.vencimento||'') < mesAtual+'-01').length;
+
+  const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+  const setH = (id,v) => { const el=document.getElementById(id); if(el) el.innerHTML=v; };
+  set('fe-mrr', fmt(mrr));
+  set('fe-mrr-sub', contratosAtivos.length + ' contrato(s) ativo(s)');
+  set('fe-ticket', fmt(ticket));
+  set('fe-ticket-sub', 'entre ' + contratosAtivos.length + ' contrato(s)');
+  set('fe-inadim', fmt(inadim));
+  set('fe-inadim-sub', inadimCount + ' lançamento(s) em atraso');
+  const feM = document.getElementById('fe-margem');
+  if (feM) { feM.textContent = margem.toFixed(1) + '%'; feM.style.color = margemCor; }
+
+  /* ── Meta mensal ── */
+  const metaVal = parseFloat(document.getElementById('finexec-meta')?.value || localStorage.getItem('finexec_meta') || '0') || 0;
+  const recebidoMes = financeiro.filter(f => f.tipo==='receber' && f.status==='pago' && (f.vencimento||f.pagoEm||'').startsWith(mesAtual)).reduce((s,f) => s+(f.valor||0),0);
+  const pct = metaVal > 0 ? Math.min(100, recebidoMes / metaVal * 100) : 0;
+  const barCor = pct >= 100 ? '#22c55e' : pct >= 60 ? '#f59e0b' : 'var(--primary)';
+  set('fe-meta-pct', pct.toFixed(0) + '%');
+  set('fe-meta-rec', 'Recebido: ' + fmt(recebidoMes));
+  set('fe-meta-alvo', 'Meta: ' + fmt(metaVal));
+  const bar = document.getElementById('fe-meta-bar');
+  if (bar) { bar.style.width = pct + '%'; bar.style.background = barCor; }
+
+  /* ── Gráfico: últimos 6 meses ── */
+  const meses6 = [];
+  for (let i=5; i>=0; i--) {
+    const d = new Date(hoje.getFullYear(), hoje.getMonth()-i, 1);
+    meses6.push(d.toISOString().slice(0,7));
+  }
+  const maxVal = Math.max(1, ...meses6.map(m => {
+    const r = financeiro.filter(f => f.tipo==='receber' && (f.vencimento||'').startsWith(m)).reduce((s,f)=>s+(f.valor||0),0);
+    const d = financeiro.filter(f => f.tipo==='pagar'   && (f.vencimento||'').startsWith(m)).reduce((s,f)=>s+(f.valor||0),0);
+    return Math.max(r, d);
+  }));
+  const grafEl = document.getElementById('fe-grafico');
+  if (grafEl) {
+    grafEl.innerHTML = meses6.map(m => {
+      const r = financeiro.filter(f => f.tipo==='receber' && (f.vencimento||'').startsWith(m)).reduce((s,f)=>s+(f.valor||0),0);
+      const d = financeiro.filter(f => f.tipo==='pagar'   && (f.vencimento||'').startsWith(m)).reduce((s,f)=>s+(f.valor||0),0);
+      const hR = Math.round((r/maxVal)*112) + 8;
+      const hD = Math.round((d/maxVal)*112) + 8;
+      const [ano, mes] = m.split('-');
+      const nomeMes = new Date(+ano, +mes-1, 1).toLocaleDateString('pt-BR',{month:'short'});
+      return `<div class="fe-bar-group">
+        <div class="fe-bar-wrap">
+          <div class="fe-bar fe-bar-rec" style="height:${hR}px" title="Receita ${m}: ${fmt(r)}"></div>
+          <div class="fe-bar fe-bar-dep" style="height:${hD}px" title="Despesa ${m}: ${fmt(d)}"></div>
+        </div>
+        <div class="fe-bar-lbl">${nomeMes}</div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ── Projeção: próximos 3 meses ── */
+  const proj3 = [];
+  for (let i=1; i<=3; i++) {
+    const d = new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
+    proj3.push(d.toISOString().slice(0,7));
+  }
+  const projEl = document.getElementById('fe-projecao');
+  if (projEl) {
+    // Receita projetada = MRR (contratos recorrentes) + lançamentos já cadastrados naquele mês
+    projEl.innerHTML = proj3.map(m => {
+      const [ano, mes] = m.split('-');
+      const nomeMes = new Date(+ano, +mes-1, 1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
+      const recCad  = financeiro.filter(f => f.tipo==='receber' && (f.vencimento||'').startsWith(m)).reduce((s,f)=>s+(f.valor||0),0);
+      const despCad = financeiro.filter(f => f.tipo==='pagar'   && (f.vencimento||'').startsWith(m)).reduce((s,f)=>s+(f.valor||0),0);
+      // Se não há lançamento do mês, usa MRR como base
+      const recProj  = recCad  || mrr;
+      const saldo    = recProj - despCad;
+      const saldoCor = saldo >= 0 ? '#22c55e' : '#ef4444';
+      return `<div class="fe-proj-row">
+        <div class="fe-proj-mes">${nomeMes.charAt(0).toUpperCase()+nomeMes.slice(1)}</div>
+        <div class="fe-proj-vals">
+          <span style="color:#6c63ff">↑ ${fmt(recProj)}</span>
+          <span style="color:#ef4444">↓ ${fmt(despCad)}</span>
+        </div>
+        <div class="fe-proj-saldo" style="color:${saldoCor}">${saldo>=0?'+':''}${fmt(saldo)}</div>
+      </div>`;
+    }).join('');
+  }
+}
+window.renderFinExec = renderFinExec;
+
+/* ══════════════════════════════════════════
+   PARCEIROS — v3.8.0
 ══════════════════════════════════════════ */
 function iniciarListenerParceiros() {
   onSnapshot(collection(db, 'parceiros'), snap => {
