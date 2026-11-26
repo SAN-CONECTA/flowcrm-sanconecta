@@ -590,7 +590,7 @@ tr:hover td{background:var(--surface2)}
       </div>
       <div class="login-footer">Já tem conta? <a onclick="switchTab('entrar')">Entrar</a></div>
     </div>
-    <div class="login-version">SAN TECNOLOGIA — v3.8.1</div>
+    <div class="login-version">SAN TECNOLOGIA — v3.8.2</div>
   </div>
 </div>
 
@@ -1605,7 +1605,7 @@ tr:hover td{background:var(--surface2)}
 <!-- FOOTER -->
 <div id="app-footer">
   <span>SAN CONECTA LTDA · Sinop/MT</span>
-  <span class="ver" onclick="abrirChangelog()">v3.8.1</span>
+  <span class="ver" onclick="abrirChangelog()">v3.8.2</span>
   <span>Firebase · GitHub Pages</span>
 </div>
 
@@ -1845,7 +1845,7 @@ tr:hover td{background:var(--surface2)}
     <div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:20px">
       <div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <span class="tag tag-purple" style="font-size:12px">v3.8.1</span>
+          <span class="tag tag-purple" style="font-size:12px">v3.8.2</span>
           <span style="font-size:12px;color:var(--muted)">20/11/2026 — Versão atual</span>
         </div>
         <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
@@ -2902,7 +2902,7 @@ function renderUsuarios() {
   if (!lista) return;
   lista.innerHTML = '';
   usuarios.forEach(u => {
-    const isAdm = u.email === ADMIN_EMAIL || u.role === 'admin';
+    const isAdm = u.email === ADMIN_EMAIL; // só o master é intocável
     const tipos = u.tiposPermitidos || { consultoria:true, trust:true, infra:true, outros:true };
     const dots = [
       ['consultoria', '#eab308'], ['trust','#22c55e'], ['infra','#f97316'], ['outros','#a78bfa'], ['nexxo','#06b6d4']
