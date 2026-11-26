@@ -590,7 +590,7 @@ tr:hover td{background:var(--surface2)}
       </div>
       <div class="login-footer">Já tem conta? <a onclick="switchTab('entrar')">Entrar</a></div>
     </div>
-    <div class="login-version">SAN TECNOLOGIA — v3.8.0</div>
+    <div class="login-version">SAN TECNOLOGIA — v3.8.1</div>
   </div>
 </div>
 
@@ -685,6 +685,9 @@ tr:hover td{background:var(--surface2)}
     </div>
     <div class="nav-item hidden" id="nav-auditoria" data-page="auditoria" onclick="showPage('auditoria',this)">
       <span class="nav-icon">📋</span><span>Auditoria</span>
+    </div>
+    <div class="nav-item" id="nav-pwa-install" onclick="instalarPWA()" style="display:none">
+      <span class="nav-icon">📲</span><span>Instalar App</span>
     </div>
   </aside>
 
@@ -1602,7 +1605,7 @@ tr:hover td{background:var(--surface2)}
 <!-- FOOTER -->
 <div id="app-footer">
   <span>SAN CONECTA LTDA · Sinop/MT</span>
-  <span class="ver" onclick="abrirChangelog()">v3.8.0</span>
+  <span class="ver" onclick="abrirChangelog()">v3.8.1</span>
   <span>Firebase · GitHub Pages</span>
 </div>
 
@@ -1750,6 +1753,27 @@ tr:hover td{background:var(--surface2)}
   </div>
 </div>
 
+<!-- Modal Editar Usuário -->
+<div class="modal-overlay" id="modal-editar-usuario">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title">✏️ Editar Usuário</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Nome</label><input class="input" id="eu-nome" placeholder="Nome completo"></div>
+      <div class="form-group"><label>Perfil</label>
+        <select class="input" id="eu-role">
+          <option value="vendedor">👤 Vendedor</option>
+          <option value="admin">👑 Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="login-error" id="eu-error"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="fecharModal('modal-editar-usuario')">Cancelar</button>
+      <button class="btn btn-primary" id="eu-btn" onclick="salvarEdicaoUsuario()">💾 Salvar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal Novo Usuário -->
 <div class="modal-overlay" id="modal-novo-usuario">
   <div class="modal" style="max-width:480px">
@@ -1821,7 +1845,7 @@ tr:hover td{background:var(--surface2)}
     <div style="max-height:400px;overflow-y:auto;display:flex;flex-direction:column;gap:20px">
       <div>
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <span class="tag tag-purple" style="font-size:12px">v3.8.0</span>
+          <span class="tag tag-purple" style="font-size:12px">v3.8.1</span>
           <span style="font-size:12px;color:var(--muted)">20/11/2026 — Versão atual</span>
         </div>
         <div style="font-size:13px;display:flex;flex-direction:column;gap:6px">
@@ -2895,11 +2919,13 @@ function renderUsuarios() {
       </div>
       <div class="user-actions">
         ${!isAdm ? `
-          <button class="btn btn-ghost btn-sm" onclick="abrirPermissoes('${u.id}')">🔒 Tipos</button>
+          <button class="btn btn-ghost btn-sm" onclick="abrirEditarUsuario('${u.id}')" title="Editar">✏️</button>
+          <button class="btn btn-ghost btn-sm" onclick="abrirPermissoes('${u.id}')" title="Permissões">🔒</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetarSenha('${u.email}')" title="Resetar senha">🔑</button>
           ${u.ativo !== false
-            ? '<button class="btn btn-danger btn-sm" onclick="toggleUsuario(\'' + u.id + '\',false)">🔴 Inativar</button>'
-            : '<button class="btn btn-success btn-sm" onclick="toggleUsuario(\'' + u.id + '\',true)">🟢 Ativar</button>'}
-          <button class="btn btn-danger btn-sm" onclick="excluirUsuario('${u.id}','${u.nome}')">🗑️</button>
+            ? '<button class="btn btn-danger btn-sm" onclick="toggleUsuario(\'' + u.id + '\',false)" title="Inativar">🔴</button>'
+            : '<button class="btn btn-success btn-sm" onclick="toggleUsuario(\'' + u.id + '\',true)" title="Ativar">🟢</button>'}
+          <button class="btn btn-danger btn-sm" onclick="excluirUsuario('${u.id}','${u.nome}')" title="Excluir">🗑️</button>
         ` : '<span style="font-size:12px;color:var(--muted)">—</span>'}
       </div>`;
     lista.appendChild(row);
@@ -2922,6 +2948,57 @@ async function excluirUsuario(id, nome) {
   carregarUsuarios();
 }
 window.excluirUsuario = excluirUsuario;
+
+let editUsuarioId = null;
+function abrirEditarUsuario(id) {
+  const u = usuarios.find(x => x.id === id);
+  if (!u) return;
+  editUsuarioId = id;
+  document.getElementById('eu-nome').value  = u.nome  || '';
+  document.getElementById('eu-role').value  = u.role  || 'vendedor';
+  document.getElementById('eu-error').style.display = 'none';
+  abrirModal('modal-editar-usuario');
+}
+window.abrirEditarUsuario = abrirEditarUsuario;
+
+async function salvarEdicaoUsuario() {
+  const nome = document.getElementById('eu-nome').value.trim();
+  const role = document.getElementById('eu-role').value;
+  const err  = document.getElementById('eu-error');
+  const btn  = document.getElementById('eu-btn');
+  err.style.display = 'none';
+  if (!nome) { err.textContent='⚠️ Informe o nome.'; err.style.display='block'; return; }
+  btn.disabled = true; btn.textContent='⏳ Salvando...';
+  try {
+    await updateDoc(doc(db, 'usuarios', editUsuarioId), { nome, role });
+    logAudit('editar_usuario', 'Editado: ' + nome).catch(() => {});
+    fecharModal('modal-editar-usuario');
+    toast('✅ Usuário atualizado.');
+    carregarUsuarios();
+  } catch(e) {
+    err.textContent='❌ Erro ao salvar.'; err.style.display='block';
+  } finally {
+    btn.disabled = false; btn.textContent='💾 Salvar';
+  }
+}
+window.salvarEdicaoUsuario = salvarEdicaoUsuario;
+
+async function resetarSenha(email) {
+  if (!confirm('Enviar e-mail de redefinição de senha para ' + email + '?')) return;
+  try {
+    const res = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=AIzaSyDlK8OSZrCNungMFlhQssqif8uZSGSlFZQ', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ requestType:'PASSWORD_RESET', email })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    logAudit('reset_senha', 'Reset de senha para: ' + email).catch(() => {});
+    toast('📧 E-mail de redefinição enviado para ' + email);
+  } catch(e) {
+    toast('❌ Erro ao enviar reset: ' + (e.message||''));
+  }
+}
+window.resetarSenha = resetarSenha;
 
 function abrirModalNovoUsuario() {
   ['nu-nome','nu-email','nu-senha'].forEach(x => { document.getElementById(x).value = ''; });
@@ -5381,10 +5458,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
-<!-- PWA: botão instalar app -->
-<div id="pwa-banner" style="display:none;position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#6c63ff;color:#fff;border-radius:40px;padding:12px 24px;font-size:14px;font-weight:600;box-shadow:0 4px 20px rgba(108,99,255,.5);z-index:9999;cursor:pointer;white-space:nowrap;gap:10px;align-items:center" onclick="instalarPWA()">
+<!-- PWA: botão instalar app (oculto - substituído pelo menu) -->
+<div id="pwa-banner" style="display:none" onclick="instalarPWA()">
   📲 Instalar app no celular
-  <span onclick="event.stopPropagation();document.getElementById('pwa-banner').style.display='none'" style="margin-left:12px;opacity:.7;font-size:16px">✕</span>
 </div>
 
 <script>
@@ -5407,6 +5483,9 @@ self.addEventListener('fetch',    e => {
 // ── PWA: prompt instalar ──
 let _pwaPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
+  // Mostra item no menu lateral
+  const navPwa = document.getElementById('nav-pwa-install');
+  if (navPwa) navPwa.style.display = 'flex';
   e.preventDefault();
   _pwaPrompt = e;
   const b = document.getElementById('pwa-banner');
@@ -5415,11 +5494,12 @@ window.addEventListener('beforeinstallprompt', e => {
 function instalarPWA() {
   if (_pwaPrompt) {
     _pwaPrompt.prompt();
-    _pwaPrompt.userChoice.then(() => { _pwaPrompt = null; document.getElementById('pwa-banner').style.display = 'none'; });
+    _pwaPrompt.userChoice.then(() => { _pwaPrompt = null; const n=document.getElementById('nav-pwa-install'); if(n) n.style.display='none'; });
   }
 }
 window.addEventListener('appinstalled', () => {
-  document.getElementById('pwa-banner').style.display = 'none';
+  const navPwa = document.getElementById('nav-pwa-install');
+  if (navPwa) navPwa.style.display = 'none';
   _pwaPrompt = null;
 });
 </script>
